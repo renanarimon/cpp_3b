@@ -27,11 +27,11 @@ namespace zich{
 
         Matrix operator+(const Matrix& other); // mat = this+other
         Matrix operator+=(const Matrix& other); // this = this+other
-        Matrix operator+(); // this = +(this)
+        Matrix operator+(); // unary: this = +(this)
 
         Matrix operator-(const Matrix& other);// mat = this-other
         Matrix operator-=(const Matrix& other);// this = this-other
-        Matrix operator-();// mat = -(this)
+        Matrix operator-();// unary: mat = -(this)
 
 
         bool operator>(const Matrix& other) const; //this > other --> true

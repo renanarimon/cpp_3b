@@ -17,7 +17,8 @@ namespace zich
         }
     }
 
-    Matrix::Matrix(std::vector<double> mat, int row = 1, int col = 1)
+    /*construcor*/
+    Matrix::Matrix(std::vector<double> mat, int row = 1, int col = 1) //defult size
     {
         checkInput(mat, row, col);
         std::vector<double> v;
@@ -27,6 +28,7 @@ namespace zich
         this->_col = col;
     }
 
+    /*copy construcor*/
     Matrix::Matrix(const Matrix &other)
     {
         std::vector<double> v;
@@ -35,6 +37,7 @@ namespace zich
         this->_row = other._row;
         this->_col = other._col;
     }
+    /*distrucor*/
     Matrix::~Matrix() {}
 
     // math_operators
@@ -46,6 +49,7 @@ namespace zich
         }
     }
 
+    // mat = this+other
     Matrix Matrix::operator+(const Matrix &other)
     {
         checkSize(*this, other);
@@ -57,6 +61,8 @@ namespace zich
         Matrix ans(v, this->_row, this->_col);
         return ans;
     }
+
+    // this = this+other
     Matrix Matrix::operator+=(const Matrix &other)
     {
         checkSize(*this, other);
@@ -67,11 +73,14 @@ namespace zich
 
         return *this;
     }
+
+    // unary: this = +(this)
     Matrix Matrix::operator+()
     {
-        return Matrix(*this);
+        return Matrix(*this); // copy
     }
 
+    // mat = this-other
     Matrix Matrix::operator-(const Matrix &other)
     {
         checkSize(*this, other);
@@ -83,6 +92,7 @@ namespace zich
         return Matrix(v, this->_row, this->_col);
         ;
     }
+    // this = this-other
     Matrix Matrix::operator-=(const Matrix &other)
     {
         checkSize(*this, other);
@@ -93,6 +103,7 @@ namespace zich
 
         return *this;
     }
+    // unary: mat = -(this)
     Matrix Matrix::operator-()
     {
         std::vector<double> v;
@@ -112,30 +123,36 @@ namespace zich
         return Matrix(v, this->_row, this->_col);
     }
 
+    // compare operators: only on same size matrix
+
+    //this.sum > other.sum --> true 
     bool Matrix::operator>(const Matrix &other) const
     {
         checkSize(*this, other);
         return std::accumulate(this->_mat.begin(), this->_mat.end(), 0.0) > std::accumulate(other._mat.begin(), other._mat.end(), 0.0);
     }
 
+    //this.sum < other.sum --> true 
     bool Matrix::operator<(const Matrix &other) const
     {
         checkSize(*this, other);
         return std::accumulate(this->_mat.begin(), this->_mat.end(), 0.0) < std::accumulate(other._mat.begin(), other._mat.end(), 0.0);
     }
 
+    //this.sum >= other.sum --> true 
     bool Matrix::operator>=(const Matrix &other) const
     {
         checkSize(*this, other);
         return std::accumulate(this->_mat.begin(), this->_mat.end(), 0.0) >= std::accumulate(other._mat.begin(), other._mat.end(), 0.0);
     }
-
+    //this.sum <= other.sum --> true 
     bool Matrix::operator<=(const Matrix &other) const
     {
         checkSize(*this, other);
         return std::accumulate(this->_mat.begin(), this->_mat.end(), 0.0) <= std::accumulate(other._mat.begin(), other._mat.end(), 0.0);
     }
 
+    //this == other --> true (each index)
     bool Matrix::operator==(const Matrix &other) const
     {
         checkSize(*this, other);
@@ -144,40 +161,50 @@ namespace zich
             this->_row == other._row &&
             this->_mat == other._mat);
     }
+
+    //this != other --> true (al least one index is diff)
     bool Matrix::operator!=(const Matrix &other) const
     {
         return !(*this == other);
     }
 
+    // ++this: prefix
     Matrix Matrix::operator++()
-    { // prefix
+    { 
         for (size_t i = 0; i < this->_col * this->_row; i++)
         {
             this->_mat[i]++;
         }
         return *this;
     }
+
+    // this++: postfix
     Matrix Matrix::operator++(int)
-    { // postfix
+    { 
         Matrix tmp(*this);
         ++*this;
         return tmp;
     }
+
+    // --this: prefix
     Matrix Matrix::operator--()
-    { // prefix
+    { 
         for (size_t i = 0; i < this->_col * this->_row; i++)
         {
             this->_mat[i]--;
         }
         return *this;
     }
+
+    // this--: postfix
     Matrix Matrix::operator--(int)
-    { // postfix
+    { 
         Matrix tmp(*this);
         --*this;
         return tmp;
     }
 
+    /*mull is legall iff m*n x n*l*/
     static void checkMull(const Matrix &origin, const Matrix &other)
     {
         if (origin.getCol() != other.getRow())
@@ -186,18 +213,21 @@ namespace zich
         }
     }
 
+    // mat = this*scalar
     Matrix Matrix::operator*(double scalar) const
     {
         std::vector<double> v;
         for (size_t i = 0; i < this->_col * this->_row; i++)
         {
-            v.push_back((this->_mat[i]) * scalar);
+            v.push_back((this->_mat[i]) * scalar); //mull each index with scalar
         }
         return Matrix(v, this->_row, this->_col);
     }
 
+
+    /*turn 1D vector to 2D, by givven row & col size*/
     std::vector<std::vector<double>> Matrix::turnVec2D() const
-    { // 1D vec -->2d
+    { 
         size_t row = (size_t)this->_row;
         size_t col = (size_t)this->_col;
         std::vector<std::vector<double>> ans(row * col);
@@ -213,20 +243,28 @@ namespace zich
         return ans;
     }
 
+    /* mat = this*other
+        https://en.wikipedia.org/wiki/Matrix_multiplication
+        
+        1. turn both matrix to 2D
+         */ 
     Matrix Matrix::operator*(const Matrix &other) const
     {
         checkMull(*this, other);
-        size_t row = (size_t)this->_row;
+        size_t row = (size_t)this->_row; //convert int to size_t
         size_t col = (size_t)other._col;
-        std::vector<std::vector<double>> v1 = this->turnVec2D();
-        std::vector<std::vector<double>> v2 = other.turnVec2D();
-        std::vector<std::vector<double>> ans(row * col);
+        std::vector<std::vector<double>> v1 = this->turnVec2D(); //turn 2D (m*n)
+        std::vector<std::vector<double>> v2 = other.turnVec2D(); //turn 2D (n*l)
+
+        std::vector<std::vector<double>> ans(row * col); //ans: 2D (m*l)
+        //resize ans vec
         ans.resize(row);
         for (size_t i = 0; i < row; i++)
         {
             ans[i].resize(col);
         }
 
+        //mull
         for (size_t i = 0; i < row; i++)
         {
             for (size_t j = 0; j < col; j++)
@@ -239,6 +277,7 @@ namespace zich
             }
         }
 
+        //turn back to 1D
         std::vector<double> v;
         for (size_t i = 0; i < row; i++)
         {
@@ -250,6 +289,7 @@ namespace zich
         return Matrix(v, row, col);
     }
 
+    // this = this*scalar
     Matrix Matrix::operator*=(double scalar)
     {
         for (size_t i = 0; i < this->_col * this->_row; i++)
@@ -259,10 +299,12 @@ namespace zich
         return *this;
     }
 
+    // this = this*other
     Matrix Matrix::operator*=(const Matrix &other)
     {
         checkMull(*this, other);
-        Matrix tmp = (*this) * other;
+        Matrix tmp = (*this) * other; //use * operator
+        //change this
         this->_mat.resize(tmp._mat.size());
         for (size_t i = 0; i < tmp._mat.size(); i++)
         {
@@ -272,17 +314,20 @@ namespace zich
         return *this;
     }
 
+    // mat = scalar*this (3*mat)
     Matrix operator*(double scalar, const Matrix &mat)
     {
         return mat * scalar;
     }
 
+    // this = scalar*this (3*this)
     Matrix operator*=(double scalar, Matrix &other) 
     {
         other *= scalar;
         return other;
     }
 
+    // cout
     std::ostream &operator<<(std::ostream &out, const Matrix &mat)
     {
         for (size_t i = 0, k = 0; i < mat._row; i++)
@@ -310,7 +355,7 @@ namespace zich
         }
         return out << "]";
     }
-
+    
     static void checkCin(std::string st)
     {
         if (st.at(0) != '[' || st.at(st.size() - 1) != ']')
@@ -335,6 +380,7 @@ namespace zich
         return words;
     }
 
+    //cin
     std::istream &operator>>(std::istream &in, Matrix &mat)
     {
         std::string st;
